@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  OpenSearch:
+    Type: AWS::OpenSearchService::Domain
+    Properties:
+      DomainName: movies
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: opensearch-function
+      CodeUri: ./src
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          DOMAIN_ENDPOINT: !Sub http://${OpenSearch.DomainEndpoint}
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: /
+
+Outputs:
+  ApiId:
+    Value: !Ref ServerlessRestApi
